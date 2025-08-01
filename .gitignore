@@ -1,0 +1,4 @@
+.venv
+.idea
+*.json
+parth.egg-info

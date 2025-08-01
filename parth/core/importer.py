@@ -36,12 +36,12 @@ def request_import(path):
 
 
 def importer(path):
-    with open(path, 'r', encoding='utf-8') as file:
-    	for line in file:
-	        if line.startswith('<?xml'):
-	            return burp_import(path)
-	        elif line.startswith(('http://', 'https://')):
-	            return urls_import(path)
-	        elif line.startswith(('GET', 'POST')):
-	            return request_import(path)
-	        return {}
+	with open(path, 'r', encoding='utf-8') as file:
+		for line in file:
+			if line.startswith('<?xml'):
+				return burp_import(path)
+			elif line.startswith(('http://', 'https://')):
+				return urls_import(path)
+			elif line.startswith(('GET', 'POST')):
+				return request_import(path)
+		return {}

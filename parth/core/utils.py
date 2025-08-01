@@ -2,10 +2,9 @@ import json
 import re
 
 
-def save_result(result, savefile, save_format):
-    if save_format == 'json':
-        with open(savefile, 'w+') as f:
-            json.dump(result, f, indent=4)
+def save_result(result, savefile):
+    with open(savefile, 'w+') as jf:
+        json.dump(result, jf, indent=4)
 
 
 def extract_params(url, data):
@@ -20,7 +19,7 @@ def extract_params(url, data):
     elif data and data.startswith('{'):
         try:
             return json.loads(data).keys()
-        except:
+        except Exception as e:
             pass
     return params
 
@@ -45,7 +44,7 @@ def parse_request(string):
     """
     result = {}
     match = re.search(r'(?:([a-zA-Z0-9]+) ([^ ]+) [^ ]+\n)?([\s\S]+\n)\n?([\s\S]+)?', string)
-    result['url'] =  re.search(r'[Hh]ost:\s*([a-zA-Z0-9.-]+)').group(1) + match.group(2)
+    result['url'] = re.search(r'[Hh]ost:\s*([a-zA-Z0-9.-]+)').group(1) + match.group(2)
     result['data'] = match.group(4)
     return result
 

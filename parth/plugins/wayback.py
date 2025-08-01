@@ -21,8 +21,8 @@ def wayback(host, page):
 			headers=headers
 		).text
 		if not response:
-			return ([], False, 'wayback')
+			return [], False, 'wayback'
 		urls = filter(None, response.split('\n'))
-		return (list(set(urls)), True, 'wayback')
+		return list(set(urls)), True, 'wayback'
 	except requests.exceptions.ConnectionError:
-		return([], False, 'wayback')
+		return [], False, 'wayback'

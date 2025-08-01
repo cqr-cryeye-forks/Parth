@@ -2,34 +2,46 @@
 
 import argparse
 import concurrent.futures
-import json
 import sys
 
-from .core.colors import green, white, end, info, bad, good, run
+from .core.colors import green, end, info, bad
 from .core.importer import importer
 from .core.scanner import scanner
 from .core.utils import save_result
-
 from .plugins.commoncrawl import commoncrawl
 from .plugins.otx import otx
 from .plugins.wayback import wayback
 
-parser = argparse.ArgumentParser() # defines the parser
-# Arguments that can be supplied
-parser.add_argument('-t', help='target host', dest='host')
-parser.add_argument('-i', help='import from file', dest='input_file')
-parser.add_argument('-o', help='output file', dest='output_file')
-parser.add_argument('-u', help='uniq parameters', dest='dupes', action='store_true')
-parser.add_argument('-f', help='output format', dest='output_format', default='json')
-parser.add_argument('-p', help='save parameters', dest='save_params', action='store_true')
-parser.add_argument('--pipe', help='only display these issues', dest='pipe')
-args = parser.parse_args() # arguments to be parsed
 
-if args.input_file or args.host:
-	print('''%s      __
-     /_/ _   _ _/_ /_
-    /   (_\\ /  /  / / {%s%s%s}%s
-	''' % (green, white, __import__('parth').__version__, green, end))
+def arg_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--host',
+        help='target host',
+    )
+    parser.add_argument(
+        '--input-file', help='import from file',
+    )
+    parser.add_argument(
+        '--output',
+        help='output file',
+    )
+    parser.add_argument(
+        '--dupes',
+        help='uniq parameters',
+        action='store_true',
+    )
+    parser.add_argument(
+        '--save_params',
+        help='save parameters',
+        action='store_true',
+    )
+    parser.add_argument(
+        '--pipe',
+        help='only display these issues',
+    )
+    return parser.parse_args()
+
 
 def fetch_urls(host):
     available_plugins = {'commoncrawl': commoncrawl, 'otx': otx, 'wayback': wayback}
@@ -48,12 +60,15 @@ def fetch_urls(host):
                 del available_plugins[this_result[2]]
             for url in this_result[0]:
                 requests[url] = []
-            print('%s Progress: %i%%' % (info, progress), end='\r')
+            # print(f'{info} Progress: {progress:d}%', end='\r')
         page += 1
-    print('%s Progress: %i%%' % (info, 100), end='\r')
+    print(f'{info} Progress: {100:d}%', end='\r')
     return requests
 
+
 def main():
+    args = arg_parser()
+
     result = []
     all_params = []
 
@@ -66,7 +81,7 @@ def main():
         requests = 1
         for line in sys.stdin:
             this_result, all_params = scanner(
-                {line.rstrip('\r\n'):[]},
+                {line.rstrip('\r\n'): []},
                 args.save_params,
                 args.dupes
             )
@@ -83,16 +98,16 @@ def main():
     if requests:
         if requests != 1:
             result, all_params = scanner(requests, args.save_params, args.dupes)
-        if args.output_file:
-            save_result(result, args.output_file, args.output_format)
-            print('%s Result saved to %s' % (info, args.output_file))
+        if args.output:
+            save_result(result, args.output)
+            print(f'{info} Result saved to {args.output}')
         else:
             for each in result:
-                print('%s+%s %s' % (green, end, each['url']))
-                print('    %s- issues:%s   %s' % (green, end, ', '.join(each['issues'])))
-                print('    %s- location:%s %s' % (green, end, each['location']))
+                print(f'{green}+{end} {each["url"]}')
+                print(f'    {green}- issues:{end}   {", ".join(each["issues"])}')
+                print(f'    {green}- location:{end} {each["location"]}')
                 if each['data']:
-                    print('%s- data:%s %s' % (green, end, each['data']))
+                    print(f'{green}- data:{end} {each["data"]}')
 
     if args.save_params:
         suffix = args.input_file or args.host
